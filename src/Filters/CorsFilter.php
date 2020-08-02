@@ -32,7 +32,7 @@ class CorsFilter implements FilterInterface
 
     /**
      * Before.
-     * 
+     *
      * @param \CodeIgniter\HTTP\RequestInterface $request
      * @param null $arguments
      * @return mixed
@@ -53,7 +53,7 @@ class CorsFilter implements FilterInterface
 
     /**
      * After.
-     * 
+     *
      * @param \CodeIgniter\HTTP\RequestInterface $request
      * @param \CodeIgniter\HTTP\ResponseInterface $response
      * @param null $arguments
@@ -70,7 +70,7 @@ class CorsFilter implements FilterInterface
 
     /**
      * Default config options.
-     * 
+     *
      * @return array
      */
     protected static function defaultOptions()
