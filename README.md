@@ -2,8 +2,9 @@
 
 Inspired from https://github.com/medz/cors for CodeIgniter 4
 
-[![Latest Version](https://img.shields.io/github/release/agungsugiarto/codeigniter4-cors.svg)](https://github.com/agungsugiarto/codeigniter4-cors/releases)
+[![Latest Stable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/v)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 [![Total Downloads](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/downloads)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
+[![Latest Unstable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/v/unstable)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 [![License](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/license)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 
 ## About
