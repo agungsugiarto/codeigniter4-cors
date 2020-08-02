@@ -7,25 +7,25 @@ Inspired from https://github.com/medz/cors for CodeIgniter 4
 [![Latest Unstable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/v/unstable)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 [![License](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/license)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 
-## About
+## **About**
 
 The `codeigniter4-cors` package allows you to send [Cross-Origin Resource Sharing](http://enable-cors.org/)
 headers with Codeigniter4 filter configuration.
 
-## Features
+## **Features**
 
 * Handles CORS pre-flight OPTIONS requests
 * Adds CORS headers to your responses
 * Match routes to only add CORS to certain Requests
 
-## Installation
+## **Installation**
 
 Require the `agungsugiarto/codeigniter4-cors` package in your `composer.json` and update your dependencies:
 ```sh
-composer agungsugiarto/codeigniter4-cors
+composer require agungsugiarto/codeigniter4-cors
 ```
 
-## Global usage
+## **Global usage**
 
 To allow CORS for all your routes, first register `CorsFilter.php` filter at the top of the `$aliases` property of  `App/Config/Filter.php` class:
 
@@ -36,17 +36,32 @@ public $aliases = [
 ];
 ```
 
-Now update the config to define the paths you want to run the CORS service on, (see Configuration below):
+### **Global restrictions**
+Restrict routes based on their URI pattern by editing **app/Config/Filters.php** and adding them to the
+`$filters` array, e.g.:
 
 ```php
-public $filters = [ 
+public filters = [
+    // ...
     'cors' => ['after' => ['api/*']],
 ];
 ```
 
-> **Note:** the `api/*` prefix is assumse your prefix route.
+### **Restricting a single route**
+Any single route can be restricted by adding the filter option to the last parameter in any of the route definition methods:
+```php
+$routes->match(['get', 'options'], 'api/users', 'UserController::index', ['filter' => 'cors'])
+```
 
-## Configuration
+### **Restricting Route Groups**
+In the same way, entire groups of routes can be restricted within the `group()` method:
+```php
+$routes->group('sample', ['filter' => 'cors'], function($routes) {
+    // ...
+});
+```
+
+## **Configuration**
 
 The defaults are set in `config/cors.php`. Publish the config to copy the file to your own config:
 ```sh
@@ -57,7 +72,7 @@ for now copy manually `CorsFilter.php` to your project at app\filters folder and
 > **Note:** If you are explicitly whitelisting headers, you must include `Origin` or requests will fail to be recognized as CORS.
 
 
-### Options
+### **Options**
 
 | Option                   | Description                                                              | Default value |
 |--------------------------|--------------------------------------------------------------------------|---------------|
@@ -75,6 +90,6 @@ for now copy manually `CorsFilter.php` to your project at app\filters folder and
 
 > **Note:** Try to be a specific as possible. You can start developing with loose constraints, but it's better to be as strict as possible!
 
-## License
+## **License**
 
 Released under the MIT License, see [LICENSE](LICENSE).
