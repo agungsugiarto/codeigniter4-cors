@@ -12,8 +12,6 @@ class Cors extends BaseConfig
 
     public $allowedOrigins = ['*'];
 
-    public $allowedOriginsPatterns = [];
-
     public $exposedHeaders = [];
 
     public $maxAge = 0;

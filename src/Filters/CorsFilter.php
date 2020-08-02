@@ -20,9 +20,11 @@ class CorsFilter implements FilterInterface
      */
     protected $defaultOptions;
 
-
     /**
      * Constructor.
+     * 
+     * @param array $options
+     * @return void
      */
     public function __construct(array $options = [])
     {
@@ -79,7 +81,6 @@ class CorsFilter implements FilterInterface
             'allowedHeaders'         => config('Cors')->allowedHeaders,
             'allowedMethods'         => config('Cors')->allowedMethods,
             'allowedOrigins'         => config('Cors')->allowedOrigins,
-            'allowedOriginsPatterns' => config('Cors')->allowedOriginsPatterns,
             'exposedHeaders'         => config('Cors')->exposedHeaders,
             'maxAge'                 => config('Cors')->maxAge,
             'supportsCredentials'    => config('Cors')->supportsCredentials,

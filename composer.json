@@ -13,9 +13,7 @@
     ],
     "require": {
         "php": "^7.2",
-        "codeigniter4/framework": "^4.0",
-        "tightenco/collect": "^7.19",
-        "medz/cors": "^1.5"
+        "codeigniter4/framework": "^4.0"
     },
     "autoload": {
         "psr-4": {

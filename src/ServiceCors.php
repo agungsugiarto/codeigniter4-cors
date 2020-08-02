@@ -8,23 +8,48 @@ use CodeIgniter\HTTP\Response;
 
 class ServiceCors
 {
+    /** @var array $options */
     private $options;
 
+    /**
+     * Construct.
+     * 
+     * @param array $options
+     * @return void
+     */
     public function __construct(array $options = [])
     {
         $this->options = $this->normalizeOptions($options);
     }
 
+    /**
+     * Is cors request.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return bool
+     */
     public function isCorsRequest(Request $request): bool
     {
         return $request->hasHeader('Origin') && !$this->isSameHost($request);
     }
 
+    /**
+     * Is preflight request.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return bool
+     */
     public function isPreflightRequest(Request $request): bool
     {
-        return $request->getMethod() === 'OPTIONS' && $request->hasHeader('Access-Control-Request-Method');
+        return $request->getMethod(true) === 'OPTIONS' && $request->hasHeader('Access-Control-Request-Method');
     }
 
+    /**
+     * handle preflight headers.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return \CodeIgniter\HTTP\Response
+     */
     public function handlePreflightRequest(Request $request): Response
     {
         $response = Services::response();
@@ -34,6 +59,13 @@ class ServiceCors
         return $this->addPreflightRequestHeaders($response, $request);
     }
 
+    /**
+     * Add preflight request headers.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param \CodeIgniter\HTTP\Request  $request
+     * @return \CodeIgniter\HTTP\Response
+     */
     public function addPreflightRequestHeaders(Response $response, Request $request): Response
     {
         $this->configureAllowedOrigin($response, $request);
@@ -45,12 +77,18 @@ class ServiceCors
 
             $this->configureAllowedHeaders($response, $request);
 
-            $this->configureMaxAge($response, $request);
+            $this->configureMaxAge($response);
         }
 
         return $response;
     }
 
+    /**
+     * Is origin allowed.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return bool
+     */
     public function isOriginAllowed(Request $request): bool
     {
         if ($this->options['allowedOrigins'] === true) {
@@ -61,7 +99,7 @@ class ServiceCors
             return false;
         }
 
-        $origin = $request->getHeader('Origin');
+        $origin = $request->getHeader('Origin')->getValue();
 
         if (in_array($origin, $this->options['allowedOrigins'])) {
             return true;
@@ -76,6 +114,13 @@ class ServiceCors
         return false;
     }
 
+    /**
+     * Add actual request headers.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param \CodeIgniter\HTTP\Request  $request
+     * @return \CodeIgniter\HTTP\Response
+     */
     public function addActualRequestHeaders(Response $response, Request $request): Response
     {
         $this->configureAllowedOrigin($response, $request);
@@ -83,23 +128,36 @@ class ServiceCors
         if ($response->hasHeader('Access-Control-Allow-Origin')) {
             $this->configureAllowCredentials($response, $request);
 
-            $this->configureExposedHeaders($response, $request);
+            $this->configureExposedHeaders($response);
         }
 
         return $response;
     }
 
-    public function varyHeader(Response $response, $header): Response
+    /**
+     * Vary headers options.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param mixed                      $header
+     * @return \CodeIgniter\HTTP\Response
+     */
+    public function varyHeader(Response $response, $header)
     {
         if (!$response->hasHeader('Vary')) {
             $response->setHeader('Vary', $header);
         } elseif (!in_array($header, explode(', ', $response->getHeader('Vary')))) {
-            $response->setHeader('Vary', $response->getHeader('Vary') . ', ' . $header);
+            $response->setHeader('Vary', $response->getHeader('Vary')->getValue() . ', ' . $header);
         }
 
         return $response;
     }
 
+    /**
+     * Normalize options config.
+     * 
+     * @param array $options
+     * @return array
+     */
     private function normalizeOptions(array $options = []): array
     {
         $options += [
@@ -131,6 +189,13 @@ class ServiceCors
         return $options;
     }
 
+    /**
+     * Configure allow origin.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param \CodeIgniter\HTTP\Request  $request
+     * @return void
+     */
     private function configureAllowedOrigin(Response $response, Request $request)
     {
         if ($this->options['allowedOrigins'] === true && !$this->options['supportsCredentials']) {
@@ -142,13 +207,18 @@ class ServiceCors
         } else {
             // For dynamic headers, check the origin first
             if ($this->isOriginAllowed($request)) {
-                $response->setHeader('Access-Control-Allow-Origin', $request->getHeader('Origin'));
+                $response->setHeader('Access-Control-Allow-Origin', $request->getHeader('Origin')->getValue());
             }
 
             $this->varyHeader($response, 'Origin');
         }
     }
 
+    /**
+     * Is the singgle origin allowed.
+     * 
+     * @return void
+     */
     private function isSingleOriginAllowed(): bool
     {
         if ($this->options['allowedOrigins'] === true || !empty($this->options['allowedOriginsPatterns'])) {
@@ -158,10 +228,17 @@ class ServiceCors
         return count($this->options['allowedOrigins']) === 1;
     }
 
+    /**
+     * Configure allow methods.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param \CodeIgniter\HTTP\Request  $request
+     * @return void
+     */
     private function configureAllowedMethods(Response $response, Request $request)
     {
         if ($this->options['allowedMethods'] === true) {
-            $allowMethods = strtoupper($request->getHeader('Access-Control-Request-Method'));
+            $allowMethods = strtoupper($request->getHeader('Access-Control-Request-Method')->getValue());
             $this->varyHeader($response, 'Access-Control-Request-Method');
         } else {
             $allowMethods = implode(', ', $this->options['allowedMethods']);
@@ -170,17 +247,31 @@ class ServiceCors
         $response->setHeader('Access-Control-Allow-Methods', $allowMethods);
     }
 
+    /**
+     * Configure allow headers.
+     * 
+     * @param \CodeIgniter\HTTP\Response $response
+     * @param \CodeIgniter\HTTP\Request  $request
+     * @return void
+     */
     private function configureAllowedHeaders(Response $response, Request $request)
     {
         if ($this->options['allowedHeaders'] === true) {
-            $allowHeaders = $request->getHeader('Access-Control-Request-Headers');
+            $allowHeaders = $request->getHeader('Access-Control-Request-Headers')->getValue();
             $this->varyHeader($response, 'Access-Control-Request-Headers');
         } else {
             $allowHeaders = implode(', ', $this->options['allowedHeaders']);
         }
+
         $response->setHeader('Access-Control-Allow-Headers', $allowHeaders);
     }
 
+    /**
+     * Configure allow credentials.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return void
+     */
     private function configureAllowCredentials(Response $response, Request $request)
     {
         if ($this->options['supportsCredentials']) {
@@ -188,22 +279,40 @@ class ServiceCors
         }
     }
 
-    private function configureExposedHeaders(Response $response, Request $request)
+    /**
+     * Configure expose headers.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return void
+     */
+    private function configureExposedHeaders(Response $response)
     {
         if ($this->options['exposedHeaders']) {
             $response->setHeader('Access-Control-Expose-Headers', implode(', ', $this->options['exposedHeaders']));
         }
     }
 
-    private function configureMaxAge(Response $response, Request $request)
+    /**
+     * Configure max age.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return void
+     */
+    private function configureMaxAge(Response $response)
     {
         if ($this->options['maxAge'] !== null) {
-            $response->setHeader('Access-Control-Max-Age', (int) $this->options['maxAge']);
+            $response->setHeader('Access-Control-Max-Age', (string) $this->options['maxAge']);
         }
     }
 
+    /**
+     * Cek is same host.
+     * 
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return bool
+     */
     private function isSameHost(Request $request): bool
     {
-        return $request->getHeader('Origin') === config('App')->baseURL;
+        return $request->getHeader('Origin')->getValue() === config('App')->baseURL;
     }
 }
