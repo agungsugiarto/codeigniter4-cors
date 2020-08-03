@@ -1,6 +1,6 @@
 # CORS Filter for CodeIgniter 4
 
-Inspired from https://github.com/medz/cors for CodeIgniter 4
+Inspired from https://github.com/asm89/stack-cors for CodeIgniter 4
 
 [![Latest Stable Version](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/v)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
 [![Total Downloads](https://poser.pugx.org/agungsugiarto/codeigniter4-cors/downloads)](https://packagist.org/packages/agungsugiarto/codeigniter4-cors)
