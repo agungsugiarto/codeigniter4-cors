@@ -65,7 +65,7 @@ $routes->group('sample', ['filter' => 'cors'], function($routes) {
 
 The defaults are set in `config/cors.php`. Publish the config to copy the file to your own config:
 ```sh
-for now copy manually `Cors.php` to your project at App\Config folder and open Cors.php with text editor and change namespace to App\Config.
+php spark cors:publish
 ```
 > **Note:** When using custom headers, like `X-Auth-Token` or `X-Requested-With`, you must set the `allowedHeaders` to include those headers. You can also set it to `['*']` to allow all custom headers.
 
