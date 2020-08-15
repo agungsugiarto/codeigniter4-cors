@@ -92,4 +92,4 @@ php spark cors:publish
 
 ## **License**
 
-Released under the MIT License, see [LICENSE](LICENSE).
+Released under the MIT License, see [LICENSE](https://github.com/agungsugiarto/codeigniter4-cors/blob/master/LICENSE.md).
