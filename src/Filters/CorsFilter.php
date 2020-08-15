@@ -78,12 +78,12 @@ class CorsFilter implements FilterInterface
     protected static function defaultOptions()
     {
         return [
-            'allowedHeaders'         => config('Cors')->allowedHeaders,
-            'allowedMethods'         => config('Cors')->allowedMethods,
-            'allowedOrigins'         => config('Cors')->allowedOrigins,
-            'exposedHeaders'         => config('Cors')->exposedHeaders,
-            'maxAge'                 => config('Cors')->maxAge,
-            'supportsCredentials'    => config('Cors')->supportsCredentials,
+            'allowedHeaders'      => config('Cors')->allowedHeaders,
+            'allowedMethods'      => config('Cors')->allowedMethods,
+            'allowedOrigins'      => config('Cors')->allowedOrigins,
+            'exposedHeaders'      => config('Cors')->exposedHeaders,
+            'maxAge'              => config('Cors')->maxAge,
+            'supportsCredentials' => config('Cors')->supportsCredentials,
         ];
     }
 }

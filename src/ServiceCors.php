@@ -95,7 +95,7 @@ class ServiceCors
             return true;
         }
 
-        if (!$request->hasHeader('Origin')) {
+        if (! $request->hasHeader('Origin')) {
             return false;
         }
 
@@ -143,9 +143,9 @@ class ServiceCors
      */
     public function varyHeader(Response $response, $header)
     {
-        if (!$response->hasHeader('Vary')) {
+        if (! $response->hasHeader('Vary')) {
             $response->setHeader('Vary', $header);
-        } elseif (!in_array($header, explode(', ', $response->getHeader('Vary')))) {
+        } elseif (! in_array($header, explode(', ', $response->getHeader('Vary')))) {
             $response->setHeader('Vary', $response->getHeader('Vary')->getValue() . ', ' . $header);
         }
 
