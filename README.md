@@ -9,7 +9,7 @@ Inspired from https://github.com/asm89/stack-cors for CodeIgniter 4
 
 ## **About**
 
-The `codeigniter4-cors` package allows you to send [Cross-Origin Resource Sharing](http://enable-cors.org/)
+The `codeigniter4-cors` package allows you to send [Cross-Origin Resource Sharing](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/)
 headers with Codeigniter4 filter configuration.
 
 ## **Features**
