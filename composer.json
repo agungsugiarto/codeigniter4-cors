@@ -28,6 +28,11 @@
             "Fluent\\Cors\\Tests\\": "tests/"
         }
     },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.x-dev"
+        }
+    },
     "scripts": {
         "test": "phpunit --colors=always -vvv"
     }
