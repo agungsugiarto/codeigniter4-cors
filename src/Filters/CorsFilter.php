@@ -2,6 +2,7 @@
 
 namespace Fluent\Cors\Filters;
 
+use CodeIgniter\Config\Config;
 use CodeIgniter\Config\Services;
 use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface;
@@ -16,28 +17,18 @@ class CorsFilter implements FilterInterface
     protected $cors;
 
     /**
-     * @var defaultOptions
-     */
-    protected $defaultOptions;
-
-    /**
      * Constructor.
-     * 
+     *
      * @param array $options
      * @return void
      */
-    public function __construct(array $options = [])
+    public function __construct()
     {
-        $this->defaultOptions = self::defaultOptions();
-        $this->cors = new ServiceCors(array_merge($this->defaultOptions, $options));
+        $this->cors = new ServiceCors(static::defaultOptions());
     }
 
     /**
-     * Before.
-     *
-     * @param \CodeIgniter\HTTP\RequestInterface $request
-     * @param null $arguments
-     * @return mixed
+     * @inheritdoc
      */
     public function before(RequestInterface $request, $arguments = null)
     {
@@ -54,12 +45,7 @@ class CorsFilter implements FilterInterface
     }
 
     /**
-     * After.
-     *
-     * @param \CodeIgniter\HTTP\RequestInterface $request
-     * @param \CodeIgniter\HTTP\ResponseInterface $response
-     * @param null $arguments
-     * @return mixed
+     * @inheritdoc
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
@@ -77,13 +63,15 @@ class CorsFilter implements FilterInterface
      */
     protected static function defaultOptions()
     {
+        $config = Config::get('Cors');
+
         return [
-            'allowedHeaders'      => config('Cors')->allowedHeaders,
-            'allowedMethods'      => config('Cors')->allowedMethods,
-            'allowedOrigins'      => config('Cors')->allowedOrigins,
-            'exposedHeaders'      => config('Cors')->exposedHeaders,
-            'maxAge'              => config('Cors')->maxAge,
-            'supportsCredentials' => config('Cors')->supportsCredentials,
+            'allowedHeaders'      => $config->allowedHeaders,
+            'allowedMethods'      => $config->allowedMethods,
+            'allowedOrigins'      => $config->allowedOrigins,
+            'exposedHeaders'      => $config->exposedHeaders,
+            'maxAge'              => $config->maxAge,
+            'supportsCredentials' => $config->supportsCredentials,
         ];
     }
 }

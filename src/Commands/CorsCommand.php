@@ -96,7 +96,7 @@ class CorsCommand extends BaseCommand
      */
     protected function determineSourcePath()
     {
-        $this->sourcePath = realpath(__DIR__.'/../');
+        $this->sourcePath = realpath(__DIR__ . '/../');
 
         if ($this->sourcePath == '/' || empty($this->sourcePath)) {
             CLI::error('Unable to determine the correct source directory. Bailing.');
@@ -116,14 +116,14 @@ class CorsCommand extends BaseCommand
         $config = new Autoload();
         $appPath = $config->psr4[APP_NAMESPACE];
 
-        $directory = dirname($appPath.$path);
+        $directory = dirname($appPath . $path);
 
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
         }
 
         try {
-            write_file($appPath.$path, $content);
+            write_file($appPath . $path, $content);
         } catch (\Exception $e) {
             $this->showError($e);
             exit();
@@ -131,6 +131,6 @@ class CorsCommand extends BaseCommand
 
         $path = str_replace($appPath, '', $path);
 
-        CLI::write(CLI::color('  created: ', 'green').$path);
+        CLI::write(CLI::color('  created: ', 'green') . $path);
     }
 }

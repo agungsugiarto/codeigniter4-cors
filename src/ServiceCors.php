@@ -13,7 +13,7 @@ class ServiceCors
 
     /**
      * Construct.
-     * 
+     *
      * @param array $options
      * @return void
      */
@@ -24,7 +24,7 @@ class ServiceCors
 
     /**
      * Is cors request.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return bool
      */
@@ -35,7 +35,7 @@ class ServiceCors
 
     /**
      * Is preflight request.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return bool
      */
@@ -46,7 +46,7 @@ class ServiceCors
 
     /**
      * handle preflight headers.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return \CodeIgniter\HTTP\Response
      */
@@ -61,7 +61,7 @@ class ServiceCors
 
     /**
      * Add preflight request headers.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param \CodeIgniter\HTTP\Request  $request
      * @return \CodeIgniter\HTTP\Response
@@ -85,7 +85,7 @@ class ServiceCors
 
     /**
      * Is origin allowed.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return bool
      */
@@ -116,7 +116,7 @@ class ServiceCors
 
     /**
      * Add actual request headers.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param \CodeIgniter\HTTP\Request  $request
      * @return \CodeIgniter\HTTP\Response
@@ -136,7 +136,7 @@ class ServiceCors
 
     /**
      * Vary headers options.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param mixed                      $header
      * @return \CodeIgniter\HTTP\Response
@@ -154,7 +154,7 @@ class ServiceCors
 
     /**
      * Normalize options config.
-     * 
+     *
      * @param array $options
      * @return array
      */
@@ -191,7 +191,7 @@ class ServiceCors
 
     /**
      * Configure allow origin.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param \CodeIgniter\HTTP\Request  $request
      * @return void
@@ -216,7 +216,7 @@ class ServiceCors
 
     /**
      * Is the singgle origin allowed.
-     * 
+     *
      * @return void
      */
     private function isSingleOriginAllowed(): bool
@@ -230,7 +230,7 @@ class ServiceCors
 
     /**
      * Configure allow methods.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param \CodeIgniter\HTTP\Request  $request
      * @return void
@@ -249,7 +249,7 @@ class ServiceCors
 
     /**
      * Configure allow headers.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Response $response
      * @param \CodeIgniter\HTTP\Request  $request
      * @return void
@@ -268,7 +268,7 @@ class ServiceCors
 
     /**
      * Configure allow credentials.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return void
      */
@@ -281,7 +281,7 @@ class ServiceCors
 
     /**
      * Configure expose headers.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return void
      */
@@ -294,7 +294,7 @@ class ServiceCors
 
     /**
      * Configure max age.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return void
      */
@@ -307,7 +307,7 @@ class ServiceCors
 
     /**
      * Cek is same host.
-     * 
+     *
      * @param \CodeIgniter\HTTP\Request $request
      * @return bool
      */
