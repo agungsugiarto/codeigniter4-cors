@@ -5,14 +5,15 @@ namespace Fluent\Cors;
 use CodeIgniter\Config\Services;
 use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\Response;
+use Fluent\Cors\Contracts\CorsContract;
 
-class ServiceCors
+class ServiceCors implements CorsContract
 {
     /** @var array $options */
     private $options;
 
     /**
-     * Construct.
+     * Constructor Service Cors.
      *
      * @param array $options
      * @return void
@@ -23,10 +24,7 @@ class ServiceCors
     }
 
     /**
-     * Is cors request.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return bool
+     * @inheritdoc
      */
     public function isCorsRequest(Request $request): bool
     {
@@ -34,10 +32,7 @@ class ServiceCors
     }
 
     /**
-     * Is preflight request.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return bool
+     * @inheritdoc
      */
     public function isPreflightRequest(Request $request): bool
     {
@@ -45,10 +40,7 @@ class ServiceCors
     }
 
     /**
-     * handle preflight headers.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return \CodeIgniter\HTTP\Response
+     * @inheritdoc
      */
     public function handlePreflightRequest(Request $request): Response
     {
@@ -56,17 +48,13 @@ class ServiceCors
 
         $response->setStatusCode(204);
 
-        return $this->addPreflightRequestHeaders($response, $request);
+        return $this->handleRequest($request, $response);
     }
 
     /**
-     * Add preflight request headers.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @return \CodeIgniter\HTTP\Response
+     * @inheritdoc
      */
-    public function addPreflightRequestHeaders(Response $response, Request $request): Response
+    public function handleRequest(Request $request, Response $response): Response
     {
         $this->configureAllowedOrigin($response, $request);
         
@@ -84,44 +72,9 @@ class ServiceCors
     }
 
     /**
-     * Is origin allowed.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return bool
+     * @inheritdoc
      */
-    public function isOriginAllowed(Request $request): bool
-    {
-        if ($this->options['allowedOrigins'] === true) {
-            return true;
-        }
-
-        if (! $request->hasHeader('Origin')) {
-            return false;
-        }
-
-        $origin = $request->getHeader('Origin')->getValue();
-
-        if (in_array($origin, $this->options['allowedOrigins'])) {
-            return true;
-        }
-
-        foreach ($this->options['allowedOriginsPatterns'] as $pattern) {
-            if (preg_match($pattern, $origin)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Add actual request headers.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @return \CodeIgniter\HTTP\Response
-     */
-    public function addActualRequestHeaders(Response $response, Request $request): Response
+    public function actualRequestHeader(Request $request, Response $response): Response
     {
         $this->configureAllowedOrigin($response, $request);
 
@@ -135,13 +88,9 @@ class ServiceCors
     }
 
     /**
-     * Vary headers options.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param mixed                      $header
-     * @return \CodeIgniter\HTTP\Response
+     * @inheritdoc
      */
-    public function varyHeader(Response $response, $header)
+    public function varyHeader(Response $response, string $header): Response
     {
         if (! $response->hasHeader('Vary')) {
             $response->setHeader('Vary', $header);
@@ -187,6 +136,37 @@ class ServiceCors
         }
 
         return $options;
+    }
+
+    /**
+     * Is origin allowed.
+     *
+     * @param \CodeIgniter\HTTP\Request $request
+     * @return bool
+     */
+    private function isOriginAllowed(Request $request): bool
+    {
+        if ($this->options['allowedOrigins'] === true) {
+            return true;
+        }
+
+        if (! $request->hasHeader('Origin')) {
+            return false;
+        }
+
+        $origin = $request->getHeader('Origin')->getValue();
+
+        if (in_array($origin, $this->options['allowedOrigins'])) {
+            return true;
+        }
+
+        foreach ($this->options['allowedOriginsPatterns'] as $pattern) {
+            if (preg_match($pattern, $origin)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

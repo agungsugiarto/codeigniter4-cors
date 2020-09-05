@@ -12,7 +12,7 @@ use Fluent\Cors\ServiceCors;
 class CorsFilter implements FilterInterface
 {
     /**
-     * @var CorsService
+     * @var \Fluent\Cors\ServiceCors $cors
      */
     protected $cors;
 
@@ -38,10 +38,6 @@ class CorsFilter implements FilterInterface
 
             return $response;
         }
-
-        if ($request->getMethod(true) === 'OPTIONS') {
-            $this->cors->varyHeader(Services::response(), 'Access-Control-Request-Method');
-        }
     }
 
     /**
@@ -49,8 +45,8 @@ class CorsFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        if (! $response->hasHeader('Access-Control-Allow-Origin')) {
-            $this->cors->addActualRequestHeaders($response, $request);
+        if ($this->cors->isCorsRequest($request)) {
+            $this->cors->actualRequestHeader($request, $response);
         }
         
         return $response;
