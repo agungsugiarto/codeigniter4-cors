@@ -46,7 +46,7 @@ class CorsFilter implements FilterInterface
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
         if ($this->cors->isCorsRequest($request)) {
-            $this->cors->actualRequestHeader($request, $response);
+            $this->cors->handleRequest($request, $response);
         }
         
         return $response;

@@ -2,7 +2,7 @@
 
 namespace Fluent\Cors;
 
-use CodeIgniter\Config\Services;
+use CodeIgniter\Config\Config;
 use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\Response;
 use Fluent\Cors\Contracts\CorsContract;
@@ -44,18 +44,8 @@ class ServiceCors implements CorsContract
      */
     public function handlePreflightRequest(Request $request): Response
     {
-        $response = Services::response();
+        $response = new Response(Config::get('App'));
 
-        $response->setStatusCode(204);
-
-        return $this->handleRequest($request, $response);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function handleRequest(Request $request, Response $response): Response
-    {
         $this->configureAllowedOrigin($response, $request);
         
         if ($response->hasHeader('Access-Control-Allow-Origin')) {
@@ -68,13 +58,13 @@ class ServiceCors implements CorsContract
             $this->configureMaxAge($response);
         }
 
-        return $response;
+        return $response->setStatusCode(204);
     }
 
     /**
      * @inheritdoc
      */
-    public function actualRequestHeader(Request $request, Response $response): Response
+    public function handleRequest(Request $request, Response $response): Response
     {
         $this->configureAllowedOrigin($response, $request);
 
@@ -111,7 +101,6 @@ class ServiceCors implements CorsContract
     {
         $options += [
             'allowedOrigins' => [],
-            'allowedOriginsPatterns' => [],
             'supportsCredentials' => false,
             'allowedHeaders' => [],
             'exposedHeaders' => [],
@@ -160,12 +149,6 @@ class ServiceCors implements CorsContract
             return true;
         }
 
-        foreach ($this->options['allowedOriginsPatterns'] as $pattern) {
-            if (preg_match($pattern, $origin)) {
-                return true;
-            }
-        }
-
         return false;
     }
 
@@ -201,7 +184,7 @@ class ServiceCors implements CorsContract
      */
     private function isSingleOriginAllowed(): bool
     {
-        if ($this->options['allowedOrigins'] === true || !empty($this->options['allowedOriginsPatterns'])) {
+        if ($this->options['allowedOrigins'] === true) {
             return false;
         }
 

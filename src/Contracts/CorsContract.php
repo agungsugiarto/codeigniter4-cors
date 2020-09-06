@@ -41,15 +41,6 @@ interface CorsContract
     public function isPreflightRequest(Request $request): bool;
 
     /**
-     * Add actual request headers.
-     *
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @param \CodeIgniter\HTTP\Response $response
-     * @return \CodeIgniter\HTTP\Response
-     */
-    public function actualRequestHeader(Request $request, Response $response): Response;
-
-    /**
      * Vary headers options.
      *
      * @param \CodeIgniter\HTTP\Response $response
