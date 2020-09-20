@@ -12,8 +12,7 @@
         }
     ],
     "require": {
-        "php": "^7.2",
-        "codeigniter4/framework": "^4.0"
+        "php": "^7.2"
     },
     "autoload": {
         "psr-4": {
@@ -21,6 +20,7 @@
         }
     },
     "require-dev": {
+        "codeigniter4/framework": "^4.0",
         "phpunit/phpunit": "^8.5"
     },
     "autoload-dev": {
@@ -34,6 +34,6 @@
         }
     },
     "scripts": {
-        "test": "phpunit --colors=always -vvv"
+        "test": "phpunit --testdox --colors=always"
     }
 }
