@@ -89,6 +89,7 @@ class CorsServiceTest extends CIUnitTestCase
     {
         $request = $this->setRequest()
             ->setMethod('OPTIONS')
+            ->setHeader('Origin', 'http://foobar.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
             
@@ -107,6 +108,10 @@ class CorsServiceTest extends CIUnitTestCase
         $this->assertEmpty($expected->getHeaderLine('Access-Control-Expose-Headers'));
         $this->assertEquals('GET', $expected->getHeaderLine('Access-Control-Allow-Methods'));
         $this->assertEquals('Vary', $expected->getHeader('Vary')->getName());
+        $this->assertStringContainsString(
+            "Access-Control-Request-Method, Access-Control-Request-Headers",
+            $expected->getHeaderLine('Vary')
+        );
         $this->assertEquals('X-CSRF-TOKEN', $expected->getHeaderLine('Access-Control-Allow-Headers'));
         $this->assertEquals(0, $expected->getHeaderLine('Access-Control-Max-Age'));
         $this->assertEquals(204, $expected->getStatusCode());

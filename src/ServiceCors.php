@@ -84,8 +84,8 @@ class ServiceCors implements CorsContract
     {
         if (! $response->hasHeader('Vary')) {
             $response->setHeader('Vary', $header);
-        } elseif (! in_array($header, explode(', ', $response->getHeader('Vary')))) {
-            $response->setHeader('Vary', $response->getHeader('Vary')->getValue() . ', ' . $header);
+        } elseif (! in_array($header, explode(', ', $response->getHeaderLine('Vary')))) {
+            $response->setHeader('Vary', $response->getHeaderLine('Vary') . ', ' . $header);
         }
 
         return $response;
@@ -143,7 +143,7 @@ class ServiceCors implements CorsContract
             return false;
         }
 
-        $origin = $request->getHeader('Origin')->getValue();
+        $origin = $request->getHeaderLine('Origin');
 
         if (in_array($origin, $this->options['allowedOrigins'])) {
             return true;
@@ -170,7 +170,7 @@ class ServiceCors implements CorsContract
         } else {
             // For dynamic headers, check the origin first
             if ($this->isOriginAllowed($request)) {
-                $response->setHeader('Access-Control-Allow-Origin', $request->getHeader('Origin')->getValue());
+                $response->setHeader('Access-Control-Allow-Origin', $request->getHeaderLine('Origin'));
             }
 
             $this->varyHeader($response, 'Origin');
@@ -201,7 +201,7 @@ class ServiceCors implements CorsContract
     private function configureAllowedMethods(Response $response, Request $request)
     {
         if ($this->options['allowedMethods'] === true) {
-            $allowMethods = strtoupper($request->getHeader('Access-Control-Request-Method')->getValue());
+            $allowMethods = strtoupper($request->getHeaderLine('Access-Control-Request-Method'));
             $this->varyHeader($response, 'Access-Control-Request-Method');
         } else {
             $allowMethods = implode(', ', $this->options['allowedMethods']);
@@ -220,7 +220,7 @@ class ServiceCors implements CorsContract
     private function configureAllowedHeaders(Response $response, Request $request)
     {
         if ($this->options['allowedHeaders'] === true) {
-            $allowHeaders = $request->getHeader('Access-Control-Request-Headers')->getValue();
+            $allowHeaders = $request->getHeaderLine('Access-Control-Request-Headers');
             $this->varyHeader($response, 'Access-Control-Request-Headers');
         } else {
             $allowHeaders = implode(', ', $this->options['allowedHeaders']);
@@ -235,7 +235,7 @@ class ServiceCors implements CorsContract
      * @param \CodeIgniter\HTTP\Request $request
      * @return void
      */
-    private function configureAllowCredentials(Response $response, Request $request)
+    private function configureAllowCredentials(Response $response)
     {
         if ($this->options['supportsCredentials']) {
             $response->setHeader('Access-Control-Allow-Credentials', 'true');
@@ -276,6 +276,6 @@ class ServiceCors implements CorsContract
      */
     private function isSameHost(Request $request): bool
     {
-        return $request->getHeader('Origin')->getValue() === config('App')->baseURL;
+        return $request->getHeaderLine('Origin') === config('App')->baseURL;
     }
 }
