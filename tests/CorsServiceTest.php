@@ -44,8 +44,7 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testIsNotCorsRequest()
     {
-        $request = $this->setRequest()
-            ->setHeader('Foo', 'https://foo.com');
+        $request = $this->setRequest()->setHeader('Foo', 'https://foo.com');
 
         $cors = new ServiceCors([]);
 
@@ -139,5 +138,152 @@ class CorsServiceTest extends CIUnitTestCase
 
         $this->assertEquals('*', $expected->getHeaderLine('Access-Control-Allow-Origin'));
         $this->assertEquals('Access-Control-Allow-Origin', $expected->getHeader('Access-Control-Allow-Origin')->getName());
+    }
+
+    public function testHandlePreflightRequestWithRestricAllowedHeaders()
+    {
+        $request = $this->setRequest()
+            ->setMethod('OPTIONS')
+            ->setHeader('Origin', 'http://foobar.com')
+            ->setHeader('Access-Control-Request-Method', 'GET')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['SAMPLE-RESTRICT-HEADER'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['*'],
+            'exposedHeaders'      => [],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expected = $cors->handlePreflightRequest($request);
+
+        $this->assertNotEquals(
+            $request->getHeaderLine('Access-Control-Request-Headers'),
+            $expected->getHeaderLine('Access-Control-Allow-Headers')
+        );
+    }
+
+    public function testHandlePreflightRequestWithSameRestricAllowedHeaders()
+    {
+        $request = $this->setRequest()
+            ->setMethod('OPTIONS')
+            ->setHeader('Origin', 'http://foobar.com')
+            ->setHeader('Access-Control-Request-Method', 'GET')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['X-CSRF-TOKEN'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['*'],
+            'exposedHeaders'      => [],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expected = $cors->handlePreflightRequest($request);
+
+        $this->assertEquals(
+            $request->getHeaderLine('Access-Control-Request-Headers'),
+            strtoupper($expected->getHeaderLine('Access-Control-Allow-Headers'))
+        );
+    }
+
+    public function testHandlePreflightRequestWithRestrictAllowedOrigins()
+    {
+        $request = $this->setRequest()
+            ->setMethod('OPTIONS')
+            ->setHeader('Origin', 'http://foobar.com')
+            ->setHeader('Access-Control-Request-Method', 'GET')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['*'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['http://foo.com'],
+            'exposedHeaders'      => [],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expected = $cors->handlePreflightRequest($request);
+
+        $this->assertNotEquals(
+            $request->getHeaderLine('Origin'),
+            $expected->getHeaderLine('Access-Control-Allow-Origin')
+        );
+    }
+
+    public function testHandlePreflightRequestWithSameRestrictAllowedOrigins()
+    {
+        $request = $this->setRequest()
+            ->setMethod('OPTIONS')
+            ->setHeader('Origin', 'http://foo.com')
+            ->setHeader('Access-Control-Request-Method', 'GET')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['*'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['http://foo.com'],
+            'exposedHeaders'      => [],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expected = $cors->handlePreflightRequest($request);
+
+        $this->assertEquals(
+            $request->getHeaderLine('Origin'),
+            $expected->getHeaderLine('Access-Control-Allow-Origin')
+        );
+    }
+
+    public function testHandlePreflightRequestWithExposeHeaders()
+    {
+        $request = $this->setRequest()
+            ->setMethod('GET')
+            ->setHeader('Origin', 'http://foo.com')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['*'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['*'],
+            'exposedHeaders'      => ['X-My-Custom-Header', 'X-Another-Custom-Header'],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expeted = $cors->handleRequest($request, $this->setResponse());
+
+        $this->assertEquals(
+            "X-My-Custom-Header, X-Another-Custom-Header",
+            $expeted->getHeaderLine('Access-Control-Expose-Headers')
+        );
+    }
+
+    public function testHandlePreflightRequestWithExposeHeadersNotSet()
+    {
+        $request = $this->setRequest()
+            ->setMethod('GET')
+            ->setHeader('Origin', 'http://foo.com')
+            ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
+
+        $cors = new ServiceCors([
+            'allowedHeaders'      => ['*'],
+            'allowedMethods'      => ['*'],
+            'allowedOrigins'      => ['*'],
+            'exposedHeaders'      => [],
+            'maxAge'              => 0,
+            'supportsCredentials' => false,
+        ]);
+
+        $expeted = $cors->handleRequest($request, $this->setResponse());
+
+        $this->assertEmpty(
+            $expeted->getHeaderLine('Access-Control-Expose-Headers')
+        );
     }
 }
