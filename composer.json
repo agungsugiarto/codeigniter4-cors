@@ -12,7 +12,8 @@
         }
     ],
     "require": {
-        "php": "^7.2"
+        "php": "^7.3 || ^8.0",
+        "codeigniter4/framework": "^4.1"
     },
     "autoload": {
         "psr-4": {
@@ -20,8 +21,7 @@
         }
     },
     "require-dev": {
-        "codeigniter4/framework": "^4.0",
-        "phpunit/phpunit": "^8.5"
+        "phpunit/phpunit": "^9.1"
     },
     "autoload-dev": {
         "psr-4": {
@@ -30,7 +30,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.x-dev"
+            "dev-master": "1.x-dev"
         }
     },
     "scripts": {
