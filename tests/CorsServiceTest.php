@@ -25,7 +25,7 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testIsCorsRequest()
     {
-        $request = $this->request()->setHeader('Origin', 'http://foo.test');
+        $request = $this->request()->setHeader('Origin', 'http://foo-bar.test');
 
         $cors = new ServiceCors([]);
 

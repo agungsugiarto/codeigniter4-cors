@@ -16,7 +16,7 @@ class ServiceCors
         $this->options = $this->normalizeOptions($options);
     }
 
-    protected function normalizeOptions(array $options = array()): array
+    protected function normalizeOptions(array $options = []): array
     {
         $options = array_merge([
             'allowedOrigins' => [],
@@ -61,8 +61,7 @@ class ServiceCors
      */
     public function isPreflightRequest(Request $request): bool
     {
-        return in_array($request->getMethod(), ['options', 'Options', 'OPTIONS']) &&
-            $request->hasHeader('Access-Control-Request-Method');
+        return $request->getMethod() === 'options' && $request->hasHeader('Access-Control-Request-Method');
     }
 
     /**
@@ -85,7 +84,7 @@ class ServiceCors
         $this->configureAllowedOrigin($response, $request);
 
         if ($response->hasHeader('Access-Control-Allow-Origin')) {
-            $this->configureAllowCredentials($response, $request);
+            $this->configureAllowCredentials($response);
 
             $this->configureAllowedMethods($response, $request);
 
@@ -106,7 +105,7 @@ class ServiceCors
             return true;
         }
 
-        if (!$request->hasHeader('Origin')) {
+        if (! $request->hasHeader('Origin')) {
             return false;
         }
 
@@ -133,9 +132,9 @@ class ServiceCors
         $this->configureAllowedOrigin($response, $request);
 
         if ($response->hasHeader('Access-Control-Allow-Origin')) {
-            $this->configureAllowCredentials($response, $request);
+            $this->configureAllowCredentials($response);
 
-            $this->configureExposedHeaders($response, $request);
+            $this->configureExposedHeaders($response);
         }
 
         return $response;
@@ -146,9 +145,9 @@ class ServiceCors
      */
     public function varyHeader(Response $response, $header): Response
     {
-        if (!$response->hasHeader('Vary')) {
+        if (! $response->hasHeader('Vary')) {
             $response->setHeader('Vary', $header);
-        } elseif (!in_array($header, explode(', ', $response->getHeaderLine('Vary')))) {
+        } elseif (! in_array($header, explode(', ', $response->getHeaderLine('Vary')))) {
             $response->setHeader('Vary', $response->getHeaderLine('Vary') . ', ' . $header);
         }
 
@@ -157,7 +156,7 @@ class ServiceCors
 
     protected function configureAllowedOrigin(Response $response, Request $request)
     {
-        if ($this->options['allowedOrigins'] === true && !$this->options['supportsCredentials']) {
+        if ($this->options['allowedOrigins'] === true && ! $this->options['supportsCredentials']) {
             // Safe+cacheable, allow everything
             $response->setHeader('Access-Control-Allow-Origin', '*');
         } elseif ($this->isSingleOriginAllowed()) {
@@ -175,7 +174,7 @@ class ServiceCors
 
     protected function isSingleOriginAllowed(): bool
     {
-        if ($this->options['allowedOrigins'] === true || !empty($this->options['allowedOriginsPatterns'])) {
+        if ($this->options['allowedOrigins'] === true || ! empty($this->options['allowedOriginsPatterns'])) {
             return false;
         }
 
@@ -202,17 +201,18 @@ class ServiceCors
         } else {
             $allowHeaders = implode(', ', $this->options['allowedHeaders']);
         }
+
         $response->setHeader('Access-Control-Allow-Headers', $allowHeaders);
     }
 
-    protected function configureAllowCredentials(Response $response, Request $request)
+    protected function configureAllowCredentials(Response $response)
     {
         if ($this->options['supportsCredentials']) {
             $response->setHeader('Access-Control-Allow-Credentials', 'true');
         }
     }
 
-    protected function configureExposedHeaders(Response $response, Request $request)
+    protected function configureExposedHeaders(Response $response)
     {
         if ($this->options['exposedHeaders']) {
             $response->setHeader('Access-Control-Expose-Headers', implode(', ', $this->options['exposedHeaders']));

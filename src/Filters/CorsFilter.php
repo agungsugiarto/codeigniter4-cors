@@ -23,7 +23,17 @@ class CorsFilter implements FilterInterface
      */
     public function __construct()
     {
-        $this->cors = new ServiceCors(static::defaultOptions());
+        $config = Factories::config('Cors');
+
+        $this->cors = new ServiceCors([
+            'allowedHeaders'         => $config->allowedHeaders,
+            'allowedMethods'         => $config->allowedMethods,
+            'allowedOrigins'         => $config->allowedOrigins,
+            'allowedOriginsPatterns' => $config->allowedOriginsPatterns,
+            'exposedHeaders'         => $config->exposedHeaders,
+            'maxAge'                 => $config->maxAge,
+            'supportsCredentials'    => $config->supportsCredentials,
+        ]);
     }
 
     /**
@@ -34,7 +44,9 @@ class CorsFilter implements FilterInterface
         if ($this->cors->isPreflightRequest($request)) {
             $response = $this->cors->handlePreflightRequest($request);
 
-            return $this->cors->varyHeader($response, 'Access-Control-Request-Method');
+            $this->cors->varyHeader($response, 'Access-Control-Request-Method');
+
+            return $response;
         }
     }
 
@@ -43,30 +55,8 @@ class CorsFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        if ($request->getMethod() === 'OPTIONS') {
-            $this->cors->varyHeader($response, 'Access-Control-Request-Method');
+        if (! $response->hasHeader('Access-Control-Allow-Origin')) {
+            return $this->cors->addActualRequestHeaders($response, $request);
         }
-
-        return $this->cors->addActualRequestHeaders($response, $request);
-    }
-
-    /**
-     * Default config options.
-     *
-     * @return array
-     */
-    protected static function defaultOptions()
-    {
-        $config = Factories::config('Cors');
-
-        return [
-            'allowedHeaders'         => $config->allowedHeaders,
-            'allowedMethods'         => $config->allowedMethods,
-            'allowedOrigins'         => $config->allowedOrigins,
-            'allowedOriginsPatterns' => $config->allowedOriginsPatterns,
-            'exposedHeaders'         => $config->exposedHeaders,
-            'maxAge'                 => $config->maxAge,
-            'supportsCredentials'    => $config->supportsCredentials,
-        ];
     }
 }

@@ -8,21 +8,36 @@ class Cors extends BaseConfig
 {
     /**
      * --------------------------------------------------------------------------
-     *  Allowed HTTP headers
+     * Cross-Origin Resource Sharing (CORS) Configuration
      * --------------------------------------------------------------------------
      *
-     *  Indicates which HTTP headers are allowed.
+     * Here you may configure your settings for cross-origin resource sharing
+     * or "CORS". This determines what cross-origin operations may execute
+     * in web browsers. You are free to adjust these settings as needed.
      *
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+     *
+     */
+
+    /**
+     * --------------------------------------------------------------------------
+     * Allowed HTTP headers
+     * --------------------------------------------------------------------------
+     *
+     * Indicates which HTTP headers are allowed.
+     *
+     * @var array
      */
     public $allowedHeaders = ['*'];
 
-    /*
+    /**
      * --------------------------------------------------------------------------
      * Allowed HTTP methods
      * --------------------------------------------------------------------------
      *
      * Indicates which HTTP methods are allowed.
      *
+     * @var array
      */
     public $allowedMethods = ['*'];
 
@@ -34,16 +49,18 @@ class Cors extends BaseConfig
      * Indicates which origins are allowed to perform requests.
      * Patterns also accepted, for example *.foo.com
      *
+     * @var array
      */
     public $allowedOrigins = ['*'];
 
-    /*
+    /**
      * --------------------------------------------------------------------------
      * Allowed origins patterns
      * --------------------------------------------------------------------------
      *
      * Patterns that can be used with `preg_match` to match the origin.
      *
+     * @var array
      */
     public $allowedOriginsPatterns = [];
 
@@ -54,6 +71,7 @@ class Cors extends BaseConfig
      *
      * Headers that are allowed to be exposed to the web server.
      *
+     * @var array
      */
     public $exposedHeaders = [];
 
@@ -64,6 +82,7 @@ class Cors extends BaseConfig
      *
      * Indicates how long the results of a preflight request can be cached.
      *
+     * @var int
      */
     public $maxAge = 0;
 
@@ -80,6 +99,7 @@ class Cors extends BaseConfig
      * this header is not returned with the resource, the response
      * is ignored by the browser and not returned to web content.
      *
+     * @var boolean
      */
     public $supportsCredentials = false;
 }
