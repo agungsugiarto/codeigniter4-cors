@@ -2,7 +2,8 @@
 
 namespace Fluent\Cors\Tests;
 
-use CodeIgniter\Config\Config;
+use CodeIgniter\Config\Factories;
+use CodeIgniter\Config\Services;
 use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\Response;
 use CodeIgniter\Test\CIUnitTestCase;
@@ -10,32 +11,21 @@ use Fluent\Cors\ServiceCors;
 
 class CorsServiceTest extends CIUnitTestCase
 {
-    /** @var \Fluent\Cors\Config\Cors */
-    protected $config;
-
-    /**
-     * Set request instance.
-     *
-     * @return \CodeIgniter\HTTP\Request
-     */
-    protected function setRequest()
+    /** @var Request */
+    protected function request()
     {
-        return new Request(Config::get('App'));
+        return new Request(Factories::config('App'));
     }
 
-    /**
-     * Set response instance.
-     *
-     * @return \CodeIgniter\HTTP\Response
-     */
-    protected function setResponse()
+    /** @var Response */
+    protected function response()
     {
-        return new Response(Config::get('App'));
+        return new Response(Factories::config('App'));
     }
 
     public function testIsCorsRequest()
     {
-        $request = $this->setRequest()->setHeader('Origin', 'http://foo.bar.com');
+        $request = $this->request()->setHeader('Origin', 'http://foo.test');
 
         $cors = new ServiceCors([]);
 
@@ -44,7 +34,7 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testIsNotCorsRequest()
     {
-        $request = $this->setRequest()->setHeader('Foo', 'https://foo.com');
+        $request = $this->request()->setHeader('Foo', 'https://foo.test');
 
         $cors = new ServiceCors([]);
 
@@ -53,8 +43,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testIsPreflightRequest()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Access-Control-Request-Method', 'GET');
 
         $cors = new ServiceCors([]);
@@ -64,7 +54,7 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testIsNotPreflightRequest()
     {
-        $request = $this->setRequest()->setMethod('GET')
+        $request = $this->request()->withMethod('GET')
             ->setHeader('Access-Control-Request-Method', 'GET');
 
         $cors = new ServiceCors([]);
@@ -74,7 +64,7 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testVaryHeader()
     {
-        $response = $this->setResponse()
+        $response = $this->response()
             ->setHeader('Vary', 'Access-Control-Request-Method');
 
         $cors = new ServiceCors([]);
@@ -86,8 +76,8 @@ class CorsServiceTest extends CIUnitTestCase
     
     public function testHandlePreflightRequest()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Origin', 'http://foobar.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
@@ -106,7 +96,7 @@ class CorsServiceTest extends CIUnitTestCase
         $this->assertEmpty($expected->getHeaderLine('Access-Control-Allow-Credentials'));
         $this->assertEmpty($expected->getHeaderLine('Access-Control-Expose-Headers'));
         $this->assertEquals('GET', $expected->getHeaderLine('Access-Control-Allow-Methods'));
-        $this->assertEquals('Vary', $expected->getHeader('Vary')->getName());
+        $this->assertEquals('Vary', $expected->header('Vary')->getName());
         $this->assertStringContainsString(
             "Access-Control-Request-Method, Access-Control-Request-Headers",
             $expected->getHeaderLine('Vary')
@@ -118,11 +108,11 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandleRequest()
     {
-        $request = $this->setRequest()
-            ->setMethod('GET')
-            ->setHeader('Origin', 'http://foo.bar.com');
+        $request = $this->request()
+            ->withMethod('GET')
+            ->setHeader('Origin', 'http://foo.test');
 
-        $response = $this->setResponse()
+        $response = $this->response()
             ->setHeader('Access-Control-Allow-Origin', $request->getHeaderLine('Origin'));
 
         $cors = new ServiceCors([
@@ -134,16 +124,16 @@ class CorsServiceTest extends CIUnitTestCase
             'supportsCredentials' => false,
         ]);
 
-        $expected = $cors->handleRequest($request, $response);
+        $expected = $cors->handleRequest($response, $request);
 
         $this->assertEquals('*', $expected->getHeaderLine('Access-Control-Allow-Origin'));
-        $this->assertEquals('Access-Control-Allow-Origin', $expected->getHeader('Access-Control-Allow-Origin')->getName());
+        $this->assertEquals('Access-Control-Allow-Origin', $expected->header('Access-Control-Allow-Origin')->getName());
     }
 
     public function testHandlePreflightRequestWithRestricAllowedHeaders()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Origin', 'http://foobar.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
@@ -167,8 +157,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandlePreflightRequestWithSameRestricAllowedHeaders()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Origin', 'http://foobar.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
@@ -192,8 +182,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandlePreflightRequestWithRestrictAllowedOrigins()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Origin', 'http://foobar.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
@@ -217,8 +207,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandlePreflightRequestWithSameRestrictAllowedOrigins()
     {
-        $request = $this->setRequest()
-            ->setMethod('OPTIONS')
+        $request = $this->request()
+            ->withMethod('OPTIONS')
             ->setHeader('Origin', 'http://foo.com')
             ->setHeader('Access-Control-Request-Method', 'GET')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
@@ -242,8 +232,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandlePreflightRequestWithExposeHeaders()
     {
-        $request = $this->setRequest()
-            ->setMethod('GET')
+        $request = $this->request()
+            ->withMethod('GET')
             ->setHeader('Origin', 'http://foo.com')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
 
@@ -256,7 +246,7 @@ class CorsServiceTest extends CIUnitTestCase
             'supportsCredentials' => false,
         ]);
 
-        $expeted = $cors->handleRequest($request, $this->setResponse());
+        $expeted = $cors->addActualRequestHeaders($this->response(), $request);
 
         $this->assertEquals(
             "X-My-Custom-Header, X-Another-Custom-Header",
@@ -266,8 +256,8 @@ class CorsServiceTest extends CIUnitTestCase
 
     public function testHandlePreflightRequestWithExposeHeadersNotSet()
     {
-        $request = $this->setRequest()
-            ->setMethod('GET')
+        $request = $this->request()
+            ->withMethod('GET')
             ->setHeader('Origin', 'http://foo.com')
             ->setHeader('Access-Control-Request-Headers', 'X-CSRF-TOKEN');
 
@@ -280,7 +270,7 @@ class CorsServiceTest extends CIUnitTestCase
             'supportsCredentials' => false,
         ]);
 
-        $expeted = $cors->handleRequest($request, $this->setResponse());
+        $expeted = $cors->handleRequest($this->response(), $request);
 
         $this->assertEmpty(
             $expeted->getHeaderLine('Access-Control-Expose-Headers')

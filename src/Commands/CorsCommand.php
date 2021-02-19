@@ -62,7 +62,9 @@ class CorsCommand extends BaseCommand
         $path = "{$this->sourcePath}/Config/Cors.php";
 
         $content = file_get_contents($path);
-        $content = str_replace('namespace Fluent\Cors\Config', 'namespace App\Config', $content);
+        $content = str_replace('namespace Fluent\Cors\Config', "namespace Config", $content);
+        $content = str_replace("use CodeIgniter\Config\BaseConfig;\n\n", '', $content);
+        $content = str_replace('extends BaseConfig', "extends \Fluent\Cors\Config\Cors", $content);
 
         $this->writeFile('Config/Cors.php', $content);
     }

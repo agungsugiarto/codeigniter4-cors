@@ -2,116 +2,37 @@
 
 namespace Fluent\Cors;
 
-use CodeIgniter\Config\Config;
+use CodeIgniter\Config\Factories;
 use CodeIgniter\HTTP\Request;
 use CodeIgniter\HTTP\Response;
-use Fluent\Cors\Contracts\CorsContract;
 
-class ServiceCors implements CorsContract
+class ServiceCors
 {
-    /** @var array $options */
-    private $options;
+    /** @var array */
+    protected $options;
 
-    /**
-     * Constructor Service Cors.
-     *
-     * @param array $options
-     * @return void
-     */
     public function __construct(array $options = [])
     {
         $this->options = $this->normalizeOptions($options);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function isCorsRequest(Request $request): bool
+    protected function normalizeOptions(array $options = array()): array
     {
-        return $request->hasHeader('Origin') && !$this->isSameHost($request);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isPreflightRequest(Request $request): bool
-    {
-        return $request->getMethod(true) === 'OPTIONS' && $request->hasHeader('Access-Control-Request-Method');
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function handlePreflightRequest(Request $request): Response
-    {
-        $response = new Response(Config::get('App'));
-
-        $this->configureAllowedOrigin($response, $request);
-        
-        if ($response->hasHeader('Access-Control-Allow-Origin')) {
-            $this->configureAllowCredentials($response, $request);
-
-            $this->configureAllowedMethods($response, $request);
-
-            $this->configureAllowedHeaders($response, $request);
-
-            $this->configureMaxAge($response);
-        }
-
-        return $response->setStatusCode(204);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function handleRequest(Request $request, Response $response): Response
-    {
-        $this->configureAllowedOrigin($response, $request);
-
-        if ($response->hasHeader('Access-Control-Allow-Origin')) {
-            $this->configureAllowCredentials($response, $request);
-
-            $this->configureExposedHeaders($response);
-        }
-
-        return $response;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function varyHeader(Response $response, string $header): Response
-    {
-        if (! $response->hasHeader('Vary')) {
-            $response->setHeader('Vary', $header);
-        } elseif (! in_array($header, explode(', ', $response->getHeaderLine('Vary')))) {
-            $response->setHeader('Vary', $response->getHeaderLine('Vary') . ', ' . $header);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Normalize options config.
-     *
-     * @param array $options
-     * @return array
-     */
-    private function normalizeOptions(array $options = []): array
-    {
-        $options += [
+        $options = array_merge([
             'allowedOrigins' => [],
+            'allowedOriginsPatterns' => [],
             'supportsCredentials' => false,
             'allowedHeaders' => [],
             'exposedHeaders' => [],
             'allowedMethods' => [],
             'maxAge' => 0,
-        ];
+        ], $options);
 
         // normalize array('*') to true
         if (in_array('*', $options['allowedOrigins'])) {
             $options['allowedOrigins'] = true;
         }
+
         if (in_array('*', $options['allowedHeaders'])) {
             $options['allowedHeaders'] = true;
         } else {
@@ -128,18 +49,64 @@ class ServiceCors implements CorsContract
     }
 
     /**
-     * Is origin allowed.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return bool
+     * {@inheritdoc}
      */
-    private function isOriginAllowed(Request $request): bool
+    public function isCorsRequest(Request $request): bool
+    {
+        return $request->hasHeader('Origin') && !$this->isSameHost($request);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isPreflightRequest(Request $request): bool
+    {
+        return in_array($request->getMethod(), ['options', 'Options', 'OPTIONS']) &&
+            $request->hasHeader('Access-Control-Request-Method');
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function handlePreflightRequest(Request $request): Response
+    {
+        $response = new Response(Factories::config('App'));
+
+        $response->setStatusCode(204);
+
+        return $this->handleRequest($response, $request);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function handleRequest(Response $response, Request $request): Response
+    {
+        $this->configureAllowedOrigin($response, $request);
+
+        if ($response->hasHeader('Access-Control-Allow-Origin')) {
+            $this->configureAllowCredentials($response, $request);
+
+            $this->configureAllowedMethods($response, $request);
+
+            $this->configureAllowedHeaders($response, $request);
+
+            $this->configureMaxAge($response);
+        }
+
+        return $response;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function isOriginAllowed(Request $request): bool
     {
         if ($this->options['allowedOrigins'] === true) {
             return true;
         }
 
-        if (! $request->hasHeader('Origin')) {
+        if (!$request->hasHeader('Origin')) {
             return false;
         }
 
@@ -149,17 +116,46 @@ class ServiceCors implements CorsContract
             return true;
         }
 
+        foreach ($this->options['allowedOriginsPatterns'] as $pattern) {
+            if (preg_match($pattern, $origin)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
     /**
-     * Configure allow origin.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @return void
+     * {@inheritdoc}
      */
-    private function configureAllowedOrigin(Response $response, Request $request)
+    public function addActualRequestHeaders(Response $response, Request $request): Response
+    {
+        $this->configureAllowedOrigin($response, $request);
+
+        if ($response->hasHeader('Access-Control-Allow-Origin')) {
+            $this->configureAllowCredentials($response, $request);
+
+            $this->configureExposedHeaders($response, $request);
+        }
+
+        return $response;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function varyHeader(Response $response, $header): Response
+    {
+        if (!$response->hasHeader('Vary')) {
+            $response->setHeader('Vary', $header);
+        } elseif (!in_array($header, explode(', ', $response->getHeaderLine('Vary')))) {
+            $response->setHeader('Vary', $response->getHeaderLine('Vary') . ', ' . $header);
+        }
+
+        return $response;
+    }
+
+    protected function configureAllowedOrigin(Response $response, Request $request)
     {
         if ($this->options['allowedOrigins'] === true && !$this->options['supportsCredentials']) {
             // Safe+cacheable, allow everything
@@ -177,28 +173,16 @@ class ServiceCors implements CorsContract
         }
     }
 
-    /**
-     * Is the singgle origin allowed.
-     *
-     * @return void
-     */
-    private function isSingleOriginAllowed(): bool
+    protected function isSingleOriginAllowed(): bool
     {
-        if ($this->options['allowedOrigins'] === true) {
+        if ($this->options['allowedOrigins'] === true || !empty($this->options['allowedOriginsPatterns'])) {
             return false;
         }
 
         return count($this->options['allowedOrigins']) === 1;
     }
 
-    /**
-     * Configure allow methods.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @return void
-     */
-    private function configureAllowedMethods(Response $response, Request $request)
+    protected function configureAllowedMethods(Response $response, Request $request)
     {
         if ($this->options['allowedMethods'] === true) {
             $allowMethods = strtoupper($request->getHeaderLine('Access-Control-Request-Method'));
@@ -210,14 +194,7 @@ class ServiceCors implements CorsContract
         $response->setHeader('Access-Control-Allow-Methods', $allowMethods);
     }
 
-    /**
-     * Configure allow headers.
-     *
-     * @param \CodeIgniter\HTTP\Response $response
-     * @param \CodeIgniter\HTTP\Request  $request
-     * @return void
-     */
-    private function configureAllowedHeaders(Response $response, Request $request)
+    protected function configureAllowedHeaders(Response $response, Request $request)
     {
         if ($this->options['allowedHeaders'] === true) {
             $allowHeaders = $request->getHeaderLine('Access-Control-Request-Headers');
@@ -225,57 +202,32 @@ class ServiceCors implements CorsContract
         } else {
             $allowHeaders = implode(', ', $this->options['allowedHeaders']);
         }
-
         $response->setHeader('Access-Control-Allow-Headers', $allowHeaders);
     }
 
-    /**
-     * Configure allow credentials.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return void
-     */
-    private function configureAllowCredentials(Response $response)
+    protected function configureAllowCredentials(Response $response, Request $request)
     {
         if ($this->options['supportsCredentials']) {
             $response->setHeader('Access-Control-Allow-Credentials', 'true');
         }
     }
 
-    /**
-     * Configure expose headers.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return void
-     */
-    private function configureExposedHeaders(Response $response)
+    protected function configureExposedHeaders(Response $response, Request $request)
     {
         if ($this->options['exposedHeaders']) {
             $response->setHeader('Access-Control-Expose-Headers', implode(', ', $this->options['exposedHeaders']));
         }
     }
 
-    /**
-     * Configure max age.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return void
-     */
-    private function configureMaxAge(Response $response)
+    protected function configureMaxAge(Response $response)
     {
         if ($this->options['maxAge'] !== null) {
             $response->setHeader('Access-Control-Max-Age', (string) $this->options['maxAge']);
         }
     }
 
-    /**
-     * Cek is same host.
-     *
-     * @param \CodeIgniter\HTTP\Request $request
-     * @return bool
-     */
-    private function isSameHost(Request $request): bool
+    protected function isSameHost(Request $request): bool
     {
-        return $request->getHeaderLine('Origin') === config('App')->baseURL;
+        return $request->getHeaderLine('Origin') === Factories::config('App')->baseURL;
     }
 }
