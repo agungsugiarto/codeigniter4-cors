@@ -18,6 +18,13 @@ headers with Codeigniter4 filter configuration.
 * Adds CORS headers to your responses
 * Match routes to only add CORS to certain Requests
 
+## **Upgrade from v1.x to v2.x**
+
+Upgrade from version 1.x to 2.x. Open your `composer.json` find `agungsugiarto/codeigniter4-cors` and change value to `^2.0` after that, try to re-publish config cors with command:
+```sh
+php spark cors:publish
+```
+
 ## **Installation**
 
 Require the `agungsugiarto/codeigniter4-cors` package in your `composer.json` and update your dependencies:
@@ -50,13 +57,13 @@ public filters = [
 ### **Restricting a single route**
 Any single route can be restricted by adding the filter option to the last parameter in any of the route definition methods:
 ```php
-$routes->match(['get', 'options'], 'api/users', 'UserController::index', ['filter' => 'cors'])
+$routes->get('api/users', 'UserController::index', ['filter' => 'cors']);
 ```
 
 ### **Restricting Route Groups**
 In the same way, entire groups of routes can be restricted within the `group()` method:
 ```php
-$routes->group('sample', ['filter' => 'cors'], function($routes) {
+$routes->group('sample', ['filter' => 'cors'], function ($routes) {
     // ...
 });
 ```
@@ -77,6 +84,7 @@ php spark cors:publish
 | Option                   | Description                                                              | Default value |
 |--------------------------|--------------------------------------------------------------------------|---------------|
 | allowedOrigins           | Matches the request origin. Wildcards can be used, eg. `*.mydomain.com`  |    `['*']`    |
+| allowedOriginsPatterns   | Matches the request origin with preg_match.                              |    `[]`    |
 | allowedMethods           | Matches the request method.                                              |    `['*']`    |
 | allowedHeaders           | Sets the Access-Control-Allow-Headers response header.                   |    `['*']`    |
 | exposedHeaders           | Sets the Access-Control-Expose-Headers response header.                  |    `false`    |
@@ -86,7 +94,7 @@ php spark cors:publish
 
 `allowedOrigins`, `allowedHeaders` and `allowedMethods` can be set to `['*']` to accept any value.
 
-> **Note:** For `allowedOrigins` you must include the scheme when not using a wildcard, eg. `['http://example.com', 'https://example.com']`.
+> **Note:** For `allowedOrigins` you must include the scheme when not using a wildcard, eg. `['http://example.com', 'https://example.com']`. You must also take into account that the scheme will be present when using allowed_origins_patterns.
 
 > **Note:** Try to be a specific as possible. You can start developing with loose constraints, but it's better to be as strict as possible!
 
