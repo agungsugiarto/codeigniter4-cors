@@ -1,19 +1,15 @@
 name: PHP Tests
 
 on:
-  push:
-    branches: 
-      - master
-  pull_request:
-    branches: 
-      - master
+  pull_request_target:
+    types: [opened]
 
 jobs:
   build:
 
     strategy:
       matrix:
-        php-versions: ['7.3', '7.4', '8.0']
+        php-versions: ['7.4', '8.0']
 
     runs-on: ubuntu-latest
 
