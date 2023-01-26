@@ -4,21 +4,20 @@ namespace Fluent\Cors\Config;
 
 use CodeIgniter\Config\BaseConfig;
 
+
+/**
+ * --------------------------------------------------------------------------
+ * Cross-Origin Resource Sharing (CORS) Configuration
+ * --------------------------------------------------------------------------
+ *
+ * Here you may configure your settings for cross-origin resource sharing
+ * or "CORS". This determines what cross-origin operations may execute
+ * in web browsers. You are free to adjust these settings as needed.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+ */
 class Cors extends BaseConfig
 {
-    /**
-     * --------------------------------------------------------------------------
-     * Cross-Origin Resource Sharing (CORS) Configuration
-     * --------------------------------------------------------------------------
-     *
-     * Here you may configure your settings for cross-origin resource sharing
-     * or "CORS". This determines what cross-origin operations may execute
-     * in web browsers. You are free to adjust these settings as needed.
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-     *
-     */
-
     /**
      * --------------------------------------------------------------------------
      * Allowed HTTP headers
