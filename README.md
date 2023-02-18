@@ -18,12 +18,9 @@ headers with Codeigniter4 filter configuration.
 * Adds CORS headers to your responses
 * Match routes to only add CORS to certain Requests
 
-## **Upgrade from v1.x to v2.x**
+## **Upgrade from 2.x to v3.x**
 
-Upgrade from version 1.x to 2.x. Open your `composer.json` find `agungsugiarto/codeigniter4-cors` and change value to `^2.0` after that, try to re-publish config cors with command:
-```sh
-php spark cors:publish
-```
+Upgrade from version 2.x to 3.x. Open your `composer.json` find `agungsugiarto/codeigniter4-cors` and change value to `^3.0`
 
 ## **Installation**
 
@@ -48,9 +45,12 @@ Restrict routes based on their URI pattern by editing **app/Config/Filters.php**
 `$filters` array, e.g.:
 
 ```php
-public filters = [
+public $filters = [
     // ...
-    'cors' => ['after' => ['api/*']],
+    'cors' => [
+        'before' => ['api/*'],
+        'after' => ['api/*']
+    ],
 ];
 ```
 
@@ -63,7 +63,7 @@ $routes->get('api/users', 'UserController::index', ['filter' => 'cors']);
 ### **Restricting Route Groups**
 In the same way, entire groups of routes can be restricted within the `group()` method:
 ```php
-$routes->group('sample', ['filter' => 'cors'], function ($routes) {
+$routes->group('api/v1', ['filter' => 'cors'], function ($routes) {
     // ...
 });
 ```
