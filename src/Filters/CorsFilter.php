@@ -44,7 +44,7 @@ class CorsFilter implements FilterInterface
      */
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        if ($request->getMethod(true) === 'OPTIONS') {
+        if ($request->getMethod() == 'options') {
             $response = $this->cors->varyHeader($response, 'Access-Control-Request-Method');
         }
 
